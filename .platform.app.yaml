@@ -1,22 +1,23 @@
-# This file describes an application. You can have multiple applications
-# in the same project.
-
-# The name of this app. Must be unique within a project.
+# The unique identifier of the application.
 name: sulu
 
-# The type of the application to build.
+# The language that will run your application.
 type: php:7.0
+
+# The way to build your application.
 build:
   flavor: symfony
 
-# The relationships of the application with services or other applications.
-# The left-hand side is the name of the relationship as it will be exposed
-# to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
-# side is in the form `<service name>:<endpoint name>`.
+# The runtime extensions your applications needs.
+runtime:
+    extensions:
+        - imagick
+
+# The way services are mapped within your application.
 relationships:
     database: 'mysql:mysql'
 
-# The configuration of app when it is exposed to the web.
+# The way your application is exposed to the web.
 web:
     # The public directory of the app, relative to its root.
     document_root: '/web'
@@ -24,6 +25,9 @@ web:
     passthru: '/app.php'
     # A list of static files (as regular expressions) that may be served.
     whitelist:
+      # HTML
+      - \.html$
+
       # CSS and Javascript.
       - \.css$
       - \.js$
@@ -78,28 +82,30 @@ web:
       - \.ttf$
       - \.eot$
       - \.woff$
+      - \.woff2$
       - \.otf$
 
       # robots.txt.
       - /robots\.txt$
 
-# The size of the persistent disk of the application (in MB).
+# The size of the persistent disk size of your application in MB.
 disk: 2048
 
-# The mounts that will be performed when the package is deployed.
+# The volumes that are mounted under a writable shared resource.
 mounts:
-    '/app/cache': 'shared:files/cache'
-    '/app/data': 'shared:files/data'
-    '/app/logs': 'shared:files/logs'
+    '/app/cache': 'shared:files/app-cache'
+    '/app/data': 'shared:files/app-data'
+    '/app/logs': 'shared:files/app-logs'
     '/web/uploads': 'shared:files/web-uploads'
     '/uploads': 'shared:files/uploads'
 
-# The hooks that will be performed when the package is deployed.
+# The shell commands to run during the build or deployment process.
 hooks:
     build: |
       cp ./app/Resources/webspaces/sulu.io.xml.dist ./app/Resources/webspaces/sulu.io.xml
       cp ./app/Resources/pages/overview.xml.dist ./app/Resources/pages/overview.xml
       cp ./app/Resources/pages/default.xml.dist ./app/Resources/pages/default.xml
+      cp ./app/Resources/snippets/default.xml.dist ./app/Resources/snippets/default.xml
       ./app/webconsole --env=prod assetic:dump
     deploy: |
       ./app/console --env=prod sulu:build dev --no-interaction
