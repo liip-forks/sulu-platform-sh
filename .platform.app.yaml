@@ -1,0 +1,114 @@
+# The unique identifier of the application.
+name: sulu
+
+# The language that will run your application.
+type: php:7.0
+
+# The way to build your application.
+build:
+  flavor: symfony
+
+# The runtime extensions your applications needs.
+runtime:
+    extensions:
+        - imagick
+
+# The way services are mapped within your application.
+relationships:
+    database: 'mysql:mysql'
+
+# The way your application is exposed to the web.
+web:
+    # The public directory of the app, relative to its root.
+    document_root: '/web'
+    # The front-controller script to send non-static requests to.
+    passthru: '/app.php'
+    # A list of static files (as regular expressions) that may be served.
+    whitelist:
+      # HTML
+      - \.html$
+
+      # CSS and Javascript.
+      - \.css$
+      - \.js$
+      - \.json$
+      - \.hbs$
+
+      # image/* types.
+      - \.gif$
+      - \.jpe?g$
+      - \.png$
+      - \.tiff?$
+      - \.wbmp$
+      - \.ico$
+      - \.jng$
+      - \.bmp$
+      - \.svgz?$
+
+      # audio/* types.
+      - \.midi?$
+      - \.mpe?ga$
+      - \.mp2$
+      - \.mp3$
+      - \.m4a$
+      - \.ra$
+      - \.weba$
+
+      # video/* types.
+      - \.3gpp?$
+      - \.mp4$
+      - \.mpe?g$
+      - \.mpe$
+      - \.ogv$
+      - \.mov$
+      - \.webm$
+      - \.flv$
+      - \.mng$
+      - \.asx$
+      - \.asf$
+      - \.wmv$
+      - \.avi$
+
+      # application/ogg.
+      - \.ogx$
+
+      # application/x-shockwave-flash.
+      - \.swf$
+
+      # application/java-archive.
+      - \.jar$
+
+      # fonts types.
+      - \.ttf$
+      - \.eot$
+      - \.woff$
+      - \.woff2$
+      - \.otf$
+
+      # robots.txt.
+      - /robots\.txt$
+
+# The size of the persistent disk size of your application in MB.
+disk: 2048
+
+# The volumes that are mounted under a writable shared resource.
+mounts:
+    '/app/cache': 'shared:files/app-cache'
+    '/app/data': 'shared:files/app-data'
+    '/app/logs': 'shared:files/app-logs'
+    '/web/uploads': 'shared:files/web-uploads'
+    '/uploads': 'shared:files/uploads'
+
+# The shell commands to run during the build or deployment process.
+hooks:
+    build: |
+      cp ./app/Resources/webspaces/sulu.io.xml.dist ./app/Resources/webspaces/sulu.io.xml
+      cp ./app/Resources/pages/overview.xml.dist ./app/Resources/pages/overview.xml
+      cp ./app/Resources/pages/default.xml.dist ./app/Resources/pages/default.xml
+      cp ./app/Resources/snippets/default.xml.dist ./app/Resources/snippets/default.xml
+      ./app/webconsole --env=prod assetic:dump
+    deploy: |
+      ./app/console --env=prod sulu:build dev --no-interaction
+      ./app/console --env=prod cache:clear
+      ./app/webconsole --env=prod cache:clear
+
